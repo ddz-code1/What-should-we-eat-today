@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什么・食材菜谱助手</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <p>正在为你生成～</p>
+    </div>
+
+    <!-- 保质期提醒弹窗 -->
+    <div id="expiration-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>食材过期提醒</h3>
+            <div id="expiration-list"></div>
+            <div class="modal-actions">
+                <button id="expiration-close" class="secondary-btn" style="margin: 0 auto;">我知道了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 夜间模式切换按钮 -->
+        <button id="dark-mode-toggle" class="dark-mode-toggle">
+            <i class="fas fa-sun"></i>
+        </button>
+        <!-- 页面内容区 -->
+        <div id="main-content">
+            <!-- 首页 -->
+            <div id="home-page" class="page active">
+                <div class="page-header">
+                    <h1>好的，今天我们来做菜！</h1>
+                    <p>先选一下食材</p>
+                </div>
+
+                <!-- 已选食材悬浮栏 -->
+                <div id="selected-ingredients" class="selected-bar">
+                    <div class="selected-list"></div>
+                    <button class="clear-btn">清空</button>
+                </div>
+
+                <!-- 食材选择区 -->
+                <div class="section">
+                    <div class="ingredient-section">
+                        <h2>菜菜们</h2>
+                        <div class="tag-grid">
+                            <button class="tag-btn" data-type="vegetable" data-name="土豆">土豆</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="胡萝卜">胡萝卜</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="花菜">花菜</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="白萝卜">白萝卜</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="西葫芦">西葫芦</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="番茄">番茄</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="芹菜">芹菜</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="黄瓜">黄瓜</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="洋葱">洋葱</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="莴笋">莴笋</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="蘑菇">蘑菇</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="茄子">茄子</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="豆腐">豆腐</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="包菜">包菜</button>
+                            <button class="tag-btn" data-type="vegetable" data-name="白菜">白菜</button>
+                        </div>
+                    </div>
+
+                    <div class="ingredient-section">
+                        <h2>肉肉们</h2>
+                        <div class="tag-grid">
+                            <button class="tag-btn" data-type="meat" data-name="午餐肉">午餐肉</button>
+                            <button class="tag-btn" data-type="meat" data-name="香肠">香肠</button>
+                            <button class="tag-btn" data-type="meat" data-name="腊肠">腊肠</button>
+                            <button class="tag-btn" data-type="meat" data-name="鸡肉">鸡肉</button>
+                            <button class="tag-btn" data-type="meat" data-name="猪肉">猪肉</button>
+                            <button class="tag-btn" data-type="meat" data-name="鸡蛋">鸡蛋</button>
+                            <button class="tag-btn" data-type="meat" data-name="虾">虾</button>
+                            <button class="tag-btn" data-type="meat" data-name="牛肉">牛肉</button>
+                            <button class="tag-btn" data-type="meat" data-name="骨头">骨头</button>
+                            <button class="tag-btn" data-type="meat" data-name="鱼">鱼</button>
+                        </div>
+                    </div>
+
+                    <div class="ingredient-section">
+                        <h2>主食（可选）</h2>
+                        <div class="tag-grid">
+                            <button class="tag-btn" data-type="staple" data-name="面食">面食</button>
+                            <button class="tag-btn" data-type="staple" data-name="面包">面包</button>
+                            <button class="tag-btn" data-type="staple" data-name="米">米</button>
+                            <button class="tag-btn" data-type="staple" data-name="方便面">方便面</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 匹配模式选择区 -->
+                <div class="section">
+                    <div class="mode-tabs">
+                        <button class="mode-btn active" data-mode="fuzzy">模糊匹配</button>
+                        <button class="mode-btn" data-mode="exact">精确匹配</button>
+                    </div>
+                </div>
+
+                <!-- 菜谱生成区 -->
+                <div class="section">
+                    <h2>来看看组合出的菜谱吧！</h2>
+                    <div id="recipe-list" class="recipe-list"></div>
+                </div>
+            </div>
+
+            <!-- 吃什么页面 -->
+            <div id="eat-what-page" class="page">
+                <div class="page-header">
+                    <h1>今天吃什么</h1>
+                </div>
+
+                <div class="section">
+                    <div class="quantity-selector">
+                        <button id="decrease-qty" class="qty-btn">-</button>
+                        <input type="number" id="quantity" value="7" min="1" max="20">
+                        <button id="increase-qty" class="qty-btn">+</button>
+                        <button id="random-generate" class="primary-btn">随机一下</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div id="random-recipes" class="recipe-list"></div>
+                </div>
+            </div>
+
+            <!-- 保质期管理页面 -->
+            <div id="expiration-page" class="page">
+                <div class="page-header">
+                    <h1>食材保质期管理</h1>
+                </div>
+
+                <div id="expiration-content" class="feature-content"></div>
+            </div>
+
+            <!-- 我的页面 -->
+            <div id="my-page" class="page">
+                <div class="page-header">
+                    <h1>我的</h1>
+                </div>
+                <!-- 功能内容区（由脚本渲染功能卡片与详情） -->
+                <div id="feature-content" class="feature-content"></div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </button>
+            <button class="nav-btn" data-page="eat-what">
+                <i class="fas fa-dice"></i>
+                <span>吃什么</span>
+            </button>
+            <button class="nav-btn" data-page="expiration">
+                <i class="fas fa-calendar-alt"></i>
+                <span>保质期</span>
+                <span id="expiration-badge-nav" class="badge"></span>
+            </button>
+            <button class="nav-btn" data-page="my">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- 菜谱详情弹窗 -->
+    <div id="recipe-modal" class="modal-overlay">
+        <div class="modal-content recipe-modal">
+            <div class="modal-header">
+                <h3 id="recipe-title"></h3>
+                <button id="close-recipe-modal" class="close-btn">&times;</button>
+            </div>
+            <div id="recipe-details"></div>
+            <div class="modal-actions">
+                <button id="favorite-recipe" class="secondary-btn">
+                    <i class="fas fa-heart"></i> 收藏
+                </button>
+                <button id="close-recipe-modal-bottom" class="primary-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加食材弹窗 -->
+    <div id="add-ingredient-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>添加食材</h3>
+            <form id="add-ingredient-form">
+                <div class="form-group">
+                    <label>食材名称</label>
+                    <input type="text" id="ingredient-name" name="ingredient-name" required>
+                </div>
+                <div class="form-group">
+                    <label>购买时间</label>
+                    <input type="date" id="purchase-date" name="purchase-date" required>
+                </div>
+                <div class="form-group">
+                    <label>保质期天数</label>
+                    <input type="number" id="shelf-life" name="shelf-life" value="7" min="1" max="365" required>
+                </div>
+                <div class="form-group">
+                    <label>备注（可选）</label>
+                    <input type="text" id="notes" name="notes">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-add" class="secondary-btn">取消</button>
+                    <button type="submit" class="primary-btn">确认</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加/编辑自定义菜谱弹窗 -->
+    <div id="add-custom-recipe-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="custom-recipe-title">添加自定义菜谱</h3>
+            <form id="add-custom-recipe-form">
+                <div class="form-group">
+                    <label>菜谱名称</label>
+                    <input type="text" id="recipe-name" name="recipe-name" required>
+                </div>
+                <div class="form-group">
+                    <label>食材清单（用逗号分隔）</label>
+                    <input type="text" id="recipe-ingredients" name="recipe-ingredients" placeholder="例如：土豆, 牛肉" required>
+                </div>
+                <div class="form-group">
+                    <label>制作时间</label>
+                    <input type="text" id="recipe-time" name="recipe-time" placeholder="例如：30分钟" required>
+                </div>
+                <div class="form-group">
+                    <label>难度等级</label>
+                    <select id="recipe-difficulty" name="recipe-difficulty" required>
+                        <option value="★☆☆">简单</option>
+                        <option value="★★☆">中等</option>
+                        <option value="★★★">困难</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>菜谱类型</label>
+                    <input type="text" id="recipe-type" name="recipe-type" placeholder="例如：家常菜" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>制作步骤（用换行分隔）</label>
+                    <textarea id="recipe-steps" name="recipe-steps" rows="5" placeholder="请输入制作步骤，每步一行" required></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-add-custom" class="secondary-btn">取消</button>
+                    <button type="submit" class="primary-btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
